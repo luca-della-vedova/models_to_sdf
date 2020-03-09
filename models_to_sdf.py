@@ -13,6 +13,7 @@ folderOutput = args.output
 inputFolderName = os.path.basename(folderInput)
 
 meshesDir = os.path.join(folderOutput, inputFolderName, 'meshes')
+texturesDir = os.path.join(folderOutput, inputFolderName, 'materials/textures')
 
 def createFolder(directory):
     try:
@@ -22,22 +23,50 @@ def createFolder(directory):
         print ('Error: Creating directory. ' +  directory)
         
 createFolder(meshesDir)
+createFolder(texturesDir)
 
 # copies contents of one folder to another yay
-def CopyFiles(usrInput, usrOutput):
-    src_files = os.listdir(usrInput)
+def CopyFiles(src_files, destination):
     for file_name in src_files:
-        full_file_name = os.path.join(usrInput, file_name)
-        if os.path.isfile(full_file_name):
-            shutil.copy(full_file_name, usrOutput)
+        shutil.copy(file_name, destination)
 
-CopyFiles(folderInput, meshesDir)
+def getFilesWithExtensions(folder, extensions):
+    files = []
+    for f in os.listdir(folder):
+        extension = os.path.splitext(f)[-1]
+        if extension in extensions:
+            files.append(os.path.join(folder, f))
+    return files
+
+def getTextures(folder):
+    TEXTURE_EXTENSIONS = ['.png']
+    return getFilesWithExtensions(folder, TEXTURE_EXTENSIONS)
+
+def getMeshes(folder):
+    MODEL_EXTENSIONS = ['.obj', '.mtl', '.dae']
+    return getFilesWithExtensions(folder, MODEL_EXTENSIONS)
+
+def getTemplates(folder):
+    TEMPLATE_EXTENSIONS = ['.config', '.sdf']
+    return getFilesWithExtensions(folder, TEMPLATE_EXTENSIONS)
+
+CopyFiles(getMeshes(folderInput), meshesDir)
+CopyFiles(getTextures(folderInput), texturesDir)
 
 templatesDir = os.path.join(os.getcwd(), 'templates')
 
 sdfDir = os.path.join(folderOutput, inputFolderName)
 
-CopyFiles(templatesDir, sdfDir)
+CopyFiles(getTemplates(templatesDir), sdfDir)
+
+def fixTexturePath(meshes):
+    # TODO implement
+    # Iterate over meshes files and set the texture paths to the
+    # materials/texture subfolder
+    for mesh in meshes:
+        print(mesh)
+
+fixTexturePath(getMeshes(meshesDir))
 
 ## xml editing
 
